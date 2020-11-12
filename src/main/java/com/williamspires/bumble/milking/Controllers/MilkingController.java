@@ -62,8 +62,8 @@ public class MilkingController {
         Integer count = milkingRepository.countByDiscordId(id);
         MilkingResponse response = new MilkingResponse();
         if (count > 0) {
-            response.setMessage("You have already milked your goats today " +
-                    "try again tomorrow when they have more milk");
+            response.setMessage("You have already milked your goats today. " +
+                    "Try again tomorrow when they have more milk");
         }
         else {
             List<Goats> goats = goatRepository.findGoatsByOwnerId(id);
@@ -71,7 +71,7 @@ public class MilkingController {
                     .filter(x -> x.getLevel() >= 100)
                     .collect(Collectors.toList());
             if (goats.size() < 1) {
-                response.setMessage("You currently don't have any adult goats that can be milked");
+                response.setMessage("You don't currently have any adult goats that can be milked");
             }
             else {
                 double milkAmount = goats.stream().mapToDouble(x -> (x.getLevel() - 100) * 0.3).sum();
