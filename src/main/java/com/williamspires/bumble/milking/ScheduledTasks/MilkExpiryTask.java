@@ -26,7 +26,7 @@ public class MilkExpiryTask {
     @Autowired
     FarmerRepository farmerRepository;
 
-    @Scheduled(cron = "0 0 0 * * *", zone = "GMT")
+    @Scheduled(cron = "1 0 0 * * *", zone = "GMT")
     public void reportCurrentTime() {
         log.info("The time now is {}", dateFormat.format(new Date()));
 //        Calendar c = Calendar.getInstance();
@@ -59,7 +59,7 @@ public class MilkExpiryTask {
             sb.append("<@" + user + "> lost " + loss + " lbs of milk");
             sb.append("\\n");
         });
-        if (expiredMilk.size() > 0) {
+        if (expiredMilk.size() > 0 && milkLosses.size() > 0) {
             sb.setLength(sb.length() - 2);
             PostMilkExpiry.SendWebhook(sb.toString());
         }

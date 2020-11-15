@@ -23,6 +23,7 @@ public class PostMilkExpiry {
     public static void SendWebhook(String data) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("User-Agent", "BumbleBot_milking_expiry");
         RestTemplate restTemplate = new RestTemplate();
         String requestJson = "{\n" +
                 "  \"username\":\"BumbleBot\",\n" +
