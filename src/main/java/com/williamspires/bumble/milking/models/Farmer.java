@@ -29,4 +29,7 @@ public class Farmer {
 
     @Column(name = "milk")
     private double milk;
+
+    @Column(name = "oats")
+    private boolean oats;
 }

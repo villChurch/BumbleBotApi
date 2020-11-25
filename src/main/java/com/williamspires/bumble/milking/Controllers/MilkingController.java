@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @RestController
 public class MilkingController {
@@ -33,6 +34,8 @@ public class MilkingController {
     MilkExpiryRepositoryInsert milkExpiryRepositoryInsert;
     @Autowired
     MilkExpiryRepository milkExpiryRepository;
+    @Autowired
+    GrazingRepository grazingRepository;
 
     @GetMapping("/farmer/{id}")
     public Farmer GetFarmerById(@PathVariable(value = "id") String id) throws FarmerNotFoundException {
@@ -74,19 +77,36 @@ public class MilkingController {
                 response.setMessage("You currently don't have any adult goats that can be milked");
             }
             else {
-                double milkAmount = goats.stream().mapToDouble(x -> (x.getLevel() - 100) * 0.3).sum();
+                List<Integer> grazingGoatIds = grazingRepository.findByFarmerId(farmer.getDiscordID())
+                        .stream()
+                        .map(grazing::getGoatId)
+                        .collect(Collectors.toList());
+                List<Goats> boostedBithces = goats.stream()
+                        .filter(goat -> grazingGoatIds.contains(goat.getId()))
+                        .collect(Collectors.toList());
+                goats.removeAll(boostedBithces);
+                double milkAmount = goats.stream().mapToDouble(x -> (x.getLevel() - 99) * 0.3).sum();
+                milkAmount += boostedBithces.stream().mapToDouble(x -> ((x.getLevel() - 99) * 0.3) * 1.25).sum();
+                goats.addAll(boostedBithces);
                 DecimalFormat df = new DecimalFormat("#.#");
-                response.setMessage("You have successfully milked " + goats.size() +
-                                " goats and gained " + df.format(milkAmount) + " lbs of milk");
                 Milking milking = new Milking();
                 milking.setDiscordId(id);
                 milkingRepositoryInsert.insertApiEvent(milking);
-                List<Goats> levelledGoats = new ArrayList<>();
+                StringBuilder sb = new StringBuilder();
                 goats.forEach( goat ->  {
+                    int startingLevel = goat.getLevel();
                     goat.setExperience(goat.getExperience() + (goat.getLevel() / 2));
                     goat.setLevel((int) Math.floor((Math.log((goat.getExperience() / 10)) / Math.log(1.05))));
                     goatRepository.save(goat);
+                    if (startingLevel != goat.getLevel()) {
+                        sb.append(goat.getName() + " has levelled up to level " + goat.getLevel());
+                        sb.append(System.getProperty("line.separator"));
+                    }
                 });
+                if (farmer.isOats()) {
+                    milkAmount = milkAmount * 1.25;
+                    farmer.setOats(false);
+                }
                 farmer.setMilk(farmer.getMilk() + milkAmount);
                 farmerRepository.save(farmer);
                 MilkExpiry milkExpiry = new MilkExpiry();
@@ -97,6 +117,10 @@ public class MilkingController {
                 String d = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE);
                 milkExpiry.setExpirydate(d);
                 milkExpiryRepositoryInsert.insertExpiryEvent(milkExpiry);
+                response.setMessage("You have successfully milked " + goats.size() +
+                        " goats and gained " + df.format(milkAmount) + " lbs of milk"
+                        + System.getProperty("line.separator")
+                        + sb.toString());
             }
         }
         return response;

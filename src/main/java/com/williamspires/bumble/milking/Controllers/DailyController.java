@@ -37,20 +37,28 @@ public class DailyController {
         if (dailyRepository.countByDiscordID(id) < 1) {
             Farmer farmer = farmerRepository.findById(id)
                     .orElseThrow(() -> new FarmerNotFoundException(id));
-            int baseXp = 50;
-            int baseCredits = 100;
+            int baseXp = 25;
+            int baseCredits = 50;
             int randomNum = ThreadLocalRandom.current().nextInt(1, 10 + 1);
             farmer.setCredits(farmer.getCredits() + (baseCredits * randomNum));
             farmerRepository.save(farmer);
             List<Goats> goats = goatRepository.findGoatsByOwnerId(id);
+            StringBuilder sb = new StringBuilder();
             goats.forEach(goat -> {
+                int startingLevel = goat.getLevel();
                 goat.setExperience(goat.getExperience() + (baseXp * randomNum));
                 goat.setLevel((int) Math.floor((Math.log((goat.getExperience() / 10)) / Math.log(1.05))));
                 goatRepository.save(goat);
+                if (startingLevel != goat.getLevel()) {
+                    sb.append(goat.getName() + " has levelled up to level " + goat.getLevel());
+                    sb.append(System.getProperty("line.separator"));
+                }
             });
             DailyResponse response = new DailyResponse();
             response.setResponse("You successfully collected your daily and gained " + (baseCredits * randomNum)
-                    + " credits and all your goats gained " + (baseXp * randomNum) + " experience.");
+                    + " credits and all your goats gained " + (baseXp * randomNum) + " experience."
+                    + System.getProperty("line.separator")
+                    + sb.toString());
             Daily daily = new Daily();
             daily.setDiscordID(id);
             dailyRepositoryInsert.insertApiEvent(daily);
