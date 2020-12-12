@@ -36,6 +36,8 @@ public class MilkingController {
     MilkExpiryRepository milkExpiryRepository;
     @Autowired
     GrazingRepository grazingRepository;
+    @Autowired
+    CookingDoesRepository cookingDoesRepository;
 
     @GetMapping("/farmer/{id}")
     public Farmer GetFarmerById(@PathVariable(value = "id") String id) throws FarmerNotFoundException {
@@ -73,6 +75,13 @@ public class MilkingController {
             goats = goats.stream()
                     .filter(x -> x.getLevel() >= 100)
                     .collect(Collectors.toList());
+            List<Integer> cookingDoes = cookingDoesRepository.findAll().stream()
+                    .map(CookingDoes::getGoatid)
+                    .collect(Collectors.toList());
+            List<Goats> cookingGoats = goats.stream()
+                    .filter(goat -> cookingDoes.contains(goat.getId()))
+                    .collect(Collectors.toList());
+            goats.removeAll(cookingGoats);
             if (goats.size() < 1) {
                 response.setMessage("You currently don't have any adult goats that can be milked");
             }

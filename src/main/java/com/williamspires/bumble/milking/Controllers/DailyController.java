@@ -1,14 +1,8 @@
 package com.williamspires.bumble.milking.Controllers;
 
 import com.williamspires.bumble.milking.Exceptions.FarmerNotFoundException;
-import com.williamspires.bumble.milking.Repositories.DailyRepository;
-import com.williamspires.bumble.milking.Repositories.DailyRepositoryInsert;
-import com.williamspires.bumble.milking.Repositories.FarmerRepository;
-import com.williamspires.bumble.milking.Repositories.GoatRepository;
-import com.williamspires.bumble.milking.models.Daily;
-import com.williamspires.bumble.milking.models.DailyResponse;
-import com.williamspires.bumble.milking.models.Farmer;
-import com.williamspires.bumble.milking.models.Goats;
+import com.williamspires.bumble.milking.Repositories.*;
+import com.williamspires.bumble.milking.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @RestController
 public class DailyController {
@@ -32,9 +27,12 @@ public class DailyController {
     @Autowired
     DailyRepositoryInsert dailyRepositoryInsert;
 
+    @Autowired
+    CookingDoesRepository cookingDoesRepository;
+
     @GetMapping("/daily/{id}")
     public DailyResponse GetDaily(@PathVariable(value = "id") String id) throws FarmerNotFoundException {
-        if (dailyRepository.countByDiscordID(id) < 1) {
+        if (dailyRepository.countByDiscordID(id) < 2) {
             Farmer farmer = farmerRepository.findById(id)
                     .orElseThrow(() -> new FarmerNotFoundException(id));
             int baseXp = 25;
@@ -43,6 +41,15 @@ public class DailyController {
             farmer.setCredits(farmer.getCredits() + (baseCredits * randomNum));
             farmerRepository.save(farmer);
             List<Goats> goats = goatRepository.findGoatsByOwnerId(id);
+
+            List<Integer> cookingGoatsIds = cookingDoesRepository.findAll().stream()
+                    .map(CookingDoes::getGoatid)
+                    .collect(Collectors.toList());
+            List<Goats> cookingGoats = goats.stream()
+                    .filter(goat -> cookingGoatsIds.contains(goat.getId()))
+                    .collect(Collectors.toList());
+            goats.removeAll(cookingGoats);
+
             StringBuilder sb = new StringBuilder();
             goats.forEach(goat -> {
                 int startingLevel = goat.getLevel();
