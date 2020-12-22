@@ -30,6 +30,8 @@ public class DailyController {
     @Autowired
     CookingDoesRepository cookingDoesRepository;
 
+    private int counter;
+
     @GetMapping("/daily/{id}")
     public DailyResponse GetDaily(@PathVariable(value = "id") String id) throws FarmerNotFoundException {
         if (dailyRepository.countByDiscordID(id) < 2) {
@@ -51,16 +53,21 @@ public class DailyController {
             goats.removeAll(cookingGoats);
 
             StringBuilder sb = new StringBuilder();
+            counter = 0;
             goats.forEach(goat -> {
                 int startingLevel = goat.getLevel();
                 goat.setExperience(goat.getExperience() + (baseXp * randomNum));
                 goat.setLevel((int) Math.floor((Math.log((goat.getExperience() / 10)) / Math.log(1.05))));
                 goatRepository.save(goat);
                 if (startingLevel != goat.getLevel()) {
-                    sb.append(goat.getName() + " has levelled up to level " + goat.getLevel());
-                    sb.append(System.getProperty("line.separator"));
+//                    sb.append(goat.getName() + " has levelled up to level " + goat.getLevel());
+//                    sb.append(System.getProperty("line.separator"));
+                    incrementCounter();
                 }
             });
+            if (counter > 0) {
+                sb.append(counter == 1 ? counter + " goat has levelled up" : counter + " goats have levelled up.");
+            }
             DailyResponse response = new DailyResponse();
             response.setResponse("You successfully collected your daily and gained " + (baseCredits * randomNum)
                     + " credits and all your goats gained " + (baseXp * randomNum) + " experience."
@@ -76,5 +83,9 @@ public class DailyController {
             response.setResponse("You have already collected your daily today try again tomorrow. Daily resets at midnight GB time.");
             return response;
         }
+    }
+
+    private void incrementCounter() {
+        counter++;
     }
 }

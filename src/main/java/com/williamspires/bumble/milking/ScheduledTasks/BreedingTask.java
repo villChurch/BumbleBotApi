@@ -27,7 +27,7 @@ public class BreedingTask {
     @Autowired
     NewBornKidInsert newBornKidInsert;
 
-    @Scheduled(cron = "0 58 23 * * *", zone = "GMT")
+    @Scheduled(cron = "0 58 0 * * *", zone = "GMT")
     public void BreedingScheduledTask() {
         List<Integer> doesReadyIds = cookingDoesRepository.doesReady()
                 .stream()
@@ -41,7 +41,7 @@ public class BreedingTask {
         if (doesReadyAsGoats.size() > 0) {
             for (Goats doe : doesReadyAsGoats) {
                 int numberOfKiddsToMake = ThreadLocalRandom.current().nextInt(1, 5);
-                sb.append("<@" + doe.getOwnerId() + "> " + doe.getName() + " has produced " + numberOfKiddsToMake + " new kidds");
+                sb.append("<@" + doe.getOwnerId() + "> " + doe.getName() + " has produced " + numberOfKiddsToMake + " new kids");
                 sb.append("\\n");
                 for (int i = 0; i < numberOfKiddsToMake; i++) {
                     newBornKidInsert.saveKiddToDB(GenerateNewKid(doe));
@@ -91,6 +91,6 @@ public class BreedingTask {
         else {
             goat = "LMkid";
         }
-        return goat + baseColour.toLowerCase() + ".png";
+        return "Goat_Images/Kids/" + goat + baseColour.toLowerCase() + ".png";
     }
 }

@@ -39,6 +39,8 @@ public class MilkingController {
     @Autowired
     CookingDoesRepository cookingDoesRepository;
 
+    private int counter;
+
     @GetMapping("/farmer/{id}")
     public Farmer GetFarmerById(@PathVariable(value = "id") String id) throws FarmerNotFoundException {
         return  farmerRepository.findById(id)
@@ -102,14 +104,14 @@ public class MilkingController {
                 milking.setDiscordId(id);
                 milkingRepositoryInsert.insertApiEvent(milking);
                 StringBuilder sb = new StringBuilder();
+                counter = 0;
                 goats.forEach( goat ->  {
                     int startingLevel = goat.getLevel();
                     goat.setExperience(goat.getExperience() + (goat.getLevel() / 2));
                     goat.setLevel((int) Math.floor((Math.log((goat.getExperience() / 10)) / Math.log(1.05))));
                     goatRepository.save(goat);
                     if (startingLevel != goat.getLevel()) {
-                        sb.append(goat.getName() + " has levelled up to level " + goat.getLevel());
-                        sb.append(System.getProperty("line.separator"));
+                        counter++;
                     }
                 });
                 if (farmer.isOats()) {
@@ -126,6 +128,9 @@ public class MilkingController {
                 String d = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE);
                 milkExpiry.setExpirydate(d);
                 milkExpiryRepositoryInsert.insertExpiryEvent(milkExpiry);
+                if (counter > 0){
+                    sb.append(counter == 1 ? counter + " goat has levelled up" : counter + " goats have levelled up.");
+                }
                 response.setMessage("You have successfully milked " + goats.size() +
                         " goats and gained " + df.format(milkAmount) + " lbs of milk"
                         + System.getProperty("line.separator")
