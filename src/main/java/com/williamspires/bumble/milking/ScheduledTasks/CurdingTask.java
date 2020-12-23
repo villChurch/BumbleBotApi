@@ -8,12 +8,16 @@ import com.williamspires.bumble.milking.Webhook.PostMilkExpiry;
 import com.williamspires.bumble.milking.models.Curding;
 import com.williamspires.bumble.milking.models.Dairy;
 import com.williamspires.bumble.milking.models.SoftCheeseExpiry;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.util.Calendar;
 import java.util.List;
 
+@Component
+@Slf4j
 public class CurdingTask {
 
     @Autowired
