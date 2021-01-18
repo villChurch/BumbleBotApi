@@ -45,7 +45,7 @@ public class CurdingTask {
                 SoftCheeseExpiry softCheeseExpiry = new SoftCheeseExpiry();
                 softCheeseExpiry.setAmount((int) (cm.getAmount() / 10));
                 softCheeseExpiry.setDiscordID(cm.getDiscordId());
-                softCheeseExpiry.setExpiryDate(d);
+                softCheeseExpiry.setExpirydate(d);
                 softCheeseExpiryInsertRepository.insertExpiryEvent(softCheeseExpiry);
                 sb.append("<@" + cm.getDiscordId() + "> gained " + (cm.getAmount()/10) + " lbs of soft cheese which will rot on " + d);
                 sb.append("\\n");

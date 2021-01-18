@@ -34,7 +34,7 @@ public class DailyController {
 
     @GetMapping("/daily/{id}")
     public DailyResponse GetDaily(@PathVariable(value = "id") String id) throws FarmerNotFoundException {
-        if (dailyRepository.countByDiscordID(id) < 2) {
+        if (dailyRepository.countByDiscordID(id) < 1) {
             Farmer farmer = farmerRepository.findById(id)
                     .orElseThrow(() -> new FarmerNotFoundException(id));
             int baseXp = 25;

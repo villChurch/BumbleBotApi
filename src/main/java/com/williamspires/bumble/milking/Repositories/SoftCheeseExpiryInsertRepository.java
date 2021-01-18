@@ -17,7 +17,7 @@ public class SoftCheeseExpiryInsertRepository {
     public void insertExpiryEvent(SoftCheeseExpiry softCheeseExpiry) {
         entitymanager.createNativeQuery("INSERT INTO softcheeseexpiry (amount, expiryDate, DiscordID) values (?,?,?)")
                 .setParameter(1, softCheeseExpiry.getAmount())
-                .setParameter(2, softCheeseExpiry.getExpiryDate())
+                .setParameter(2, softCheeseExpiry.getExpirydate())
                 .setParameter(3, softCheeseExpiry.getDiscordID())
                 .executeUpdate();
     }

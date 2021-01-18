@@ -5,11 +5,11 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-@Entity
-@Table(name = "softcheeseexpiry")
 @Getter
 @Setter
-public class SoftCheeseExpiry {
+@Entity
+@Table(name="aging")
+public class Aging {
 
     @GeneratedValue
     @Id
@@ -17,11 +17,11 @@ public class SoftCheeseExpiry {
     private int id;
 
     @Column(name = "amount")
-    private int amount;
+    private double amount;
+
+    @Column(name = "DiscordID")
+    private String discordId;
 
     @Column(name = "expirydate")
     private String expirydate;
-
-    @Column(name = "DiscordID")
-    private String discordID;
 }
