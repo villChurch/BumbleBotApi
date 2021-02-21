@@ -22,7 +22,7 @@ public class SoftCheeseTask {
     @Autowired
     DairyRepository dairyRepository;
 
-    @Scheduled(cron = "0 10 0 * * *", zone = "GMT")
+//    @Scheduled(cron = "0 10 0 * * *", zone = "GMT")
     private void RemoveExpiredCheese() {
         List<SoftCheeseExpiry> expiredSoftCheese = softCheeseExpiryRepository.GetRottenSoftCheese();
         StringBuilder sb = new StringBuilder();

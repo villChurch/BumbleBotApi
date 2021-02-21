@@ -26,7 +26,7 @@ public class MilkExpiryTask {
     @Autowired
     FarmerRepository farmerRepository;
 
-    @Scheduled(cron = "1 0 0 * * *", zone = "GMT")
+//    @Scheduled(cron = "1 0 0 * * *", zone = "GMT")
     public void reportCurrentTime() {
         log.info("The time now is {}", dateFormat.format(new Date()));
 //        Calendar c = Calendar.getInstance();
