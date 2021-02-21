@@ -69,7 +69,7 @@ public class DairyController {
         aging.setDiscordId(id);
         aging.setAmount(amount);
         aging.setExpirydate(d);
-        agingInsertRepository.insertWithEntityManager(aging);
+        agingInsertRepository.insertApiEvent(aging);
         return  amount + " lbs of soft cheese have been added to your cave and will be processed into hard cheese in 1-2 days";
     }
     
