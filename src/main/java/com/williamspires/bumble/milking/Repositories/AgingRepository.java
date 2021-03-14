@@ -12,4 +12,6 @@ public interface AgingRepository extends JpaRepository<Aging, Integer> {
 
     @Query(value = "SELECT * FROM aging WHERE expiryDate <= DATE_SUB(NOW() , INTERVAL 1 DAY)", nativeQuery=true)
     List<Aging> GetAgedCheese();
+
+    List<Aging> findAgingByDiscordId(final String discordId);
 }
