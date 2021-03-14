@@ -42,14 +42,20 @@ public class AgingTask {
                         .orElseThrow(() -> new DairyNotFoundException(esc.getDiscordId()));
                 cave.setSoftcheese(cave.getSoftcheese() - esc.getAmount());
                 caveRepository.save(cave);
-                agingRepository.delete(esc);
                 double amountGained = esc.getAmount()/10;
                 dairy.setHardcheese(dairy.getHardcheese() + amountGained);
                 dairyRepository.save(dairy);
                 sb.append("<@" + esc.getDiscordId() + "> gained " + amountGained + " lbs of hard cheese");
                 sb.append("\\n");
             } catch (DairyNotFoundException | CaveNotFoundException e) {
+                log.info("Cheese aging has failed as the Dairy or cave could not be found {}", e.getMessage());
                 e.printStackTrace();
+            }
+            catch (Exception e) {
+                log.error("Cheese aging has failed with the following message {}", e.getMessage());
+                e.printStackTrace();
+            }
+            finally {
                 agingRepository.delete(esc);
             }
         });
