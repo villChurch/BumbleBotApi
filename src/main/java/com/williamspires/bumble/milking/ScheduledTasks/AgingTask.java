@@ -25,7 +25,7 @@ public class AgingTask {
     @Autowired
     DairyRepository dairyRepository;
 
-    @Scheduled(cron = "0 9 0 * * *", zone = "GMT")
+    @Scheduled(cron = "0 30 0 * * *", zone = "GMT")
     private void AgeSomeCheese() {
         var agedCheese = agingRepository.GetAgedCheese();
         StringBuilder sb = new StringBuilder();
