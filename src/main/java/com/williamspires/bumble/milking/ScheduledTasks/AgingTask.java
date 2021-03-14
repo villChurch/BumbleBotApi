@@ -59,8 +59,7 @@ public class AgingTask {
         }
     }
 
-//    @Scheduled(cron = "0 25 0 * * *", zone = "GMT")
-    @Scheduled(fixedDelay = 10000000, initialDelay = 1000)
+    @Scheduled(cron = "0 25 0 * * *", zone = "GMT")
     private void FixNonAgedCheese() {
         var caves = caveRepository.findAll();
         StringBuilder sb = new StringBuilder();
