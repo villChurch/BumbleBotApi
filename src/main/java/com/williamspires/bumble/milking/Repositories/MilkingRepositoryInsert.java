@@ -20,8 +20,4 @@ public class MilkingRepositoryInsert {
                 .executeUpdate();
     }
 
-    @Transactional
-    public void insertWithEntityManager(Milking milkingEvent) {
-        this.entitymanager.persist(milkingEvent);
-    }
 }

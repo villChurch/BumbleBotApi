@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +44,7 @@ public class AgingTask {
                 double amountGained = esc.getAmount()/10;
                 dairy.setHardcheese(dairy.getHardcheese() + amountGained);
                 dairyRepository.save(dairy);
-                sb.append("<@" + esc.getDiscordId() + "> gained " + amountGained + " lbs of hard cheese");
+                sb.append("<@").append(esc.getDiscordId()).append("> gained ").append(amountGained).append(" lbs of hard cheese");
                 sb.append("\\n");
             } catch (DairyNotFoundException | CaveNotFoundException e) {
                 log.info("Cheese aging has failed as the Dairy or cave could not be found {}", e.getMessage());
@@ -59,7 +58,7 @@ public class AgingTask {
                 agingRepository.delete(esc);
             }
         });
-        if (agedCheese.size() > 0 && sb.toString() != null && sb.length() > 3) {
+        if (agedCheese.size() > 0 && sb.length() > 3) {
             sb.setLength(sb.length() - 2);
             PostMilkExpiry.SendWebhook(sb.toString());
         }
@@ -72,7 +71,7 @@ public class AgingTask {
         Map<Cave, Double> playersCheese = new HashMap<>();
         caves.forEach(cave -> {
             var aging = agingRepository.findAgingByDiscordId(cave.getOwnerId()).size() == 0 ? 0 :
-                    agingRepository.findAgingByDiscordId(cave.getOwnerId()).stream().mapToDouble(o -> o.getAmount()).sum();
+                    agingRepository.findAgingByDiscordId(cave.getOwnerId()).stream().mapToDouble(Aging::getAmount).sum();
             playersCheese.putIfAbsent(cave, aging);
         });
         log.info("Found {} caves", caves.size());
@@ -82,12 +81,12 @@ public class AgingTask {
                     var dairy = dairyRepository.findByOwnerId(c.getOwnerId()).orElseThrow(() -> new DairyNotFoundException(c.getOwnerId()));
                     var amountToAdd = c.getSoftcheese() - a;
                     var amountGained = amountToAdd / 10;
-                    log.info("Cave with owener id {} has {} missing hard cheese", c.getOwnerId(), amountGained);
+                    log.info("Cave with owner id {} has {} missing hard cheese", c.getOwnerId(), amountGained);
                     c.setSoftcheese(c.getSoftcheese() - amountToAdd);
                     caveRepository.save(c);
                     dairy.setHardcheese(dairy.getHardcheese() + amountGained);
                     dairyRepository.save(dairy);
-                    sb.append("<@" + dairy.getOwnerId() + "> gained " + amountGained + " lbs of hard cheese");
+                    sb.append("<@").append(dairy.getOwnerId()).append("> gained ").append(amountGained).append(" lbs of hard cheese");
                     sb.append("\\n");
                 } catch (DairyNotFoundException e) {
                     e.printStackTrace();
@@ -95,7 +94,7 @@ public class AgingTask {
                 }
             }
         });
-        if (!sb.toString().isEmpty() && sb.toString() != null && sb.length() > 3) {
+        if (!sb.toString().isEmpty() && sb.length() > 3) {
             sb.setLength(sb.length() - 2);
             PostMilkExpiry.SendWebhook(sb.toString());
         }

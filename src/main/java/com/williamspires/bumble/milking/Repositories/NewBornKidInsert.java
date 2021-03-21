@@ -1,6 +1,5 @@
 package com.williamspires.bumble.milking.Repositories;
 
-import com.williamspires.bumble.milking.models.CookingDoes;
 import com.williamspires.bumble.milking.models.NewBornKids;
 import org.springframework.stereotype.Repository;
 
@@ -28,8 +27,4 @@ public class NewBornKidInsert {
                 .executeUpdate();
     }
 
-    @Transactional
-    public void insertWithEntityManager(NewBornKids kidd) {
-        this.entitymanager.persist(kidd);
-    }
 }

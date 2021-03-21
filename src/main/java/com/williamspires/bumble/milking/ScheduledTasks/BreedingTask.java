@@ -41,7 +41,7 @@ public class BreedingTask {
         if (doesReadyAsGoats.size() > 0) {
             for (Goats doe : doesReadyAsGoats) {
                 int numberOfKiddsToMake = ThreadLocalRandom.current().nextInt(1, 5);
-                sb.append("<@" + doe.getOwnerId() + "> " + doe.getName() + " has produced " + numberOfKiddsToMake + " new kids");
+                sb.append("<@").append(doe.getOwnerId()).append("> ").append(doe.getName()).append(" has produced ").append(numberOfKiddsToMake).append(" new kids");
                 sb.append("\\n");
                 for (int i = 0; i < numberOfKiddsToMake; i++) {
                     newBornKidInsert.saveKiddToDB(GenerateNewKid(doe));
@@ -82,10 +82,10 @@ public class BreedingTask {
 
     private String GetKidImage(String breed, String baseColour) {
         String goat;
-        if (breed.toLowerCase().equals("nubian")) {
+        if (breed.equalsIgnoreCase("nubian")) {
             goat = "NBkid";
         }
-        else if (breed.toLowerCase().equals("nigerian_dwarf")) {
+        else if (breed.equalsIgnoreCase("nigerian_dwarf")) {
             goat = "NDkid";
         }
         else {

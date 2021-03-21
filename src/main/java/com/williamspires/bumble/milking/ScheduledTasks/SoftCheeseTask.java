@@ -8,7 +8,6 @@ import com.williamspires.bumble.milking.models.Dairy;
 import com.williamspires.bumble.milking.models.SoftCheeseExpiry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -33,14 +32,14 @@ public class SoftCheeseTask {
                 dairy.setSoftcheese(dairy.getSoftcheese() - esc.getAmount());
                 dairyRepository.save(dairy);
                 softCheeseExpiryRepository.delete(esc);
-                sb.append("<@" + esc.getDiscordID() + "> lost " + esc.getAmount() + " lbs of soft cheese");
+                sb.append("<@").append(esc.getDiscordID()).append("> lost ").append(esc.getAmount()).append(" lbs of soft cheese");
                 sb.append("\\n");
             } catch (DairyNotFoundException e) {
                 e.printStackTrace();
                 softCheeseExpiryRepository.delete(esc);
             }
         });
-        if (expiredSoftCheese.size() > 0 && sb.toString() != null && sb.length() > 3) {
+        if (expiredSoftCheese.size() > 0 && sb.length() > 3) {
             sb.setLength(sb.length() - 2);
             PostMilkExpiry.SendWebhook(sb.toString());
         }

@@ -66,6 +66,7 @@ public class BreedingController {
         String d = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE);
         cookingDoe.setDueDate(d);
         cookingDoesInsert.startCooking(cookingDoe);
+        //noinspection OptionalGetWithoutIsPresent
         return playersGoats.stream()
         .filter(goats -> goats.getId() == goatId).findFirst().get().getName() + " has been moved to the shelter " +
                 "and will be ready after " + d;

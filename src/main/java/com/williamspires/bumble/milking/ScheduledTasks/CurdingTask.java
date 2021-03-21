@@ -47,14 +47,14 @@ public class CurdingTask {
                 softCheeseExpiry.setDiscordID(cm.getDiscordId());
                 softCheeseExpiry.setExpirydate(d);
                 softCheeseExpiryInsertRepository.insertExpiryEvent(softCheeseExpiry);
-                sb.append("<@" + cm.getDiscordId() + "> gained " + (cm.getAmount()/10) + " lbs of soft cheese which will rot on " + d);
+                sb.append("<@").append(cm.getDiscordId()).append("> gained ").append(cm.getAmount() / 10).append(" lbs of soft cheese which will rot on ").append(d);
                 sb.append("\\n");
             } catch (DairyNotFoundException e) {
                 e.printStackTrace();
                 curdingRespoitory.delete(cm);
             }
         });
-        if (curdledMilk.size() > 0 && sb.toString() != null && sb.length() > 3) {
+        if (curdledMilk.size() > 0 && sb.length() > 3) {
             sb.setLength(sb.length() - 2);
             PostMilkExpiry.SendWebhook(sb.toString());
         }

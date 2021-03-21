@@ -22,9 +22,4 @@ public class AgingInsertRepository {
                 .executeUpdate();
     }
 
-    @Transactional
-    public void insertWithEntityManager(Aging aging) {
-        this.entitymanager.persist(aging);
-    }
-
 }

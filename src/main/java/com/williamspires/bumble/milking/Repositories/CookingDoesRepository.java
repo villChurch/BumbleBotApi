@@ -10,8 +10,6 @@ import java.util.List;
 @Repository
 public interface CookingDoesRepository extends JpaRepository<CookingDoes, Integer> {
 
-    Integer countByGoatid(int goatId);
-
     @Query(value = "SELECT * FROM cookingdoes WHERE dueDate <= DATE_SUB(NOW() , INTERVAL 1 DAY)", nativeQuery=true)
     List<CookingDoes> doesReady();
 }

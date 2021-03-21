@@ -1,7 +1,6 @@
 package com.williamspires.bumble.milking.Repositories;
 
 import com.williamspires.bumble.milking.models.Daily;
-import com.williamspires.bumble.milking.models.Milking;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -21,8 +20,4 @@ public class DailyRepositoryInsert {
                 .executeUpdate();
     }
 
-    @Transactional
-    public void insertWithEntityManager(Daily daily) {
-        this.entitymanager.persist(daily);
-    }
 }

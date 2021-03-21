@@ -1,7 +1,6 @@
 package com.williamspires.bumble.milking.Repositories;
 
 import com.williamspires.bumble.milking.models.MilkExpiry;
-import com.williamspires.bumble.milking.models.Milking;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -22,8 +21,4 @@ public class MilkExpiryRepositoryInsert {
                 .executeUpdate();
     }
 
-    @Transactional
-    public void insertWithEntityManager(MilkExpiry milkingEvent) {
-        this.entitymanager.persist(milkingEvent);
-    }
 }

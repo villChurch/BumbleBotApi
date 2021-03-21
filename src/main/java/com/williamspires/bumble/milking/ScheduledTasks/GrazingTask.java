@@ -25,7 +25,7 @@ public class GrazingTask {
     GoatRepository goatRepository;
 
     @Scheduled(cron = "5 0 */12 * * *", zone = "GMT")
-    public void GrazingTask() {
+    public void GrazingScheduledTask() {
         log.info("Start grazing task");
         List<Integer> grazingGoatsIds = grazingRepository.findAll()
                 .stream()

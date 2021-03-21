@@ -2,11 +2,8 @@ package com.williamspires.bumble.milking.models;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.jpa.repository.Temporal;
-import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
-import java.sql.Date;
 
 @Entity
 @Table(name = "milkexpiry")

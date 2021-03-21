@@ -21,8 +21,4 @@ public class CookingDoesInsert {
                 .executeUpdate();
     }
 
-    @Transactional
-    public void insertWithEntityManager(CookingDoes doe) {
-        this.entitymanager.persist(doe);
-    }
 }

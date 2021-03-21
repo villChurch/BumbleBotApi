@@ -8,16 +8,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Date;
 import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @RestController
 public class MilkingController {
@@ -56,6 +50,7 @@ public class MilkingController {
 
     @GetMapping("milk/expiry/{id}")
     public List<MilkExpiry> GetMilkExpiryForFarmer(@PathVariable(value = "id") String id) throws FarmerNotFoundException {
+        //noinspection unused
         Farmer farmer = farmerRepository.findById(id)
         .orElseThrow(() -> new FarmerNotFoundException(id));
 
@@ -63,7 +58,7 @@ public class MilkingController {
     }
 
     @GetMapping("milk/{id}")
-    public MilkingResponse GetMilkingResponseForUser(@PathVariable(value = "id") String id) throws FarmerNotFoundException, ParseException {
+    public MilkingResponse GetMilkingResponseForUser(@PathVariable(value = "id") String id) throws FarmerNotFoundException {
         Farmer farmer = farmerRepository.findById(id)
                 .orElseThrow(() -> new FarmerNotFoundException(id));
         Integer count = milkingRepository.countByDiscordId(id);
@@ -107,6 +102,7 @@ public class MilkingController {
                 counter = 0;
                 goats.forEach( goat ->  {
                     int startingLevel = goat.getLevel();
+                    //noinspection IntegerDivisionInFloatingPointContext
                     goat.setExperience(goat.getExperience() + (goat.getLevel() / 2));
                     goat.setLevel((int) Math.floor((Math.log((goat.getExperience() / 10)) / Math.log(1.05))));
                     goatRepository.save(goat);
