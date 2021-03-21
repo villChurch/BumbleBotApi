@@ -52,8 +52,17 @@ public class DailyController {
                     .orElseThrow(() -> new FarmerNotFoundException(id));
             int baseXp = 25;
             int randomNum = ThreadLocalRandom.current().nextInt(1, 10 + 1);
-            farmerRepository.save(farmer);
             List<Goats> goats = goatRepository.findGoatsByOwnerId(id);
+            int runningCosts = goats.size() * 15;
+            if (runningCosts > farmer.getCredits()) {
+                DailyResponse response = new DailyResponse();
+                response.setResponse("Your current balance of " + farmer.getCredits() + " is less than the " +
+                        "expenditure for feed and supplies of "
+                        + runningCosts + " credits, therefore daily cannot be run.");
+                return response;
+            }
+            farmer.setCredits(farmer.getCredits() - runningCosts);
+            farmerRepository.save(farmer);
 
             List<Integer> cookingGoatsIds = cookingDoesRepository.findAll().stream()
                     .map(CookingDoes::getGoatid)
@@ -78,9 +87,11 @@ public class DailyController {
                 sb.append(counter == 1 ? counter + " goat has levelled up" : counter + " goats have levelled up.");
             }
             DailyResponse response = new DailyResponse();
-            response.setResponse("You successfully collected your daily and all your goats gained " + (baseXp * randomNum) + " experience."
+            response.setResponse("You completed your daily chores and all your goats gained " + (baseXp * randomNum) + " experience."
                     + System.getProperty("line.separator")
-                    + sb.toString());
+                    + sb.toString()
+                    + System.getProperty("line.separator")
+                    + "Your expenditure for feed and supplies today is " + runningCosts + " credits.");
             Daily daily = new Daily();
             daily.setDiscordID(id);
             dailyRepositoryInsert.insertApiEvent(daily);
@@ -88,7 +99,7 @@ public class DailyController {
         }
         else  {
             DailyResponse response = new DailyResponse();
-            response.setResponse("You have already collected your daily today try again tomorrow. Daily resets in "
+            response.setResponse("You have already completed your chores today. Chores need doing again in "
             + hours + " hours " + minutes + " minutes and " + seconds + " seconds.");
             return response;
         }

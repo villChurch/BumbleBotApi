@@ -47,7 +47,7 @@ public class CurdingTask {
                 softCheeseExpiry.setDiscordID(cm.getDiscordId());
                 softCheeseExpiry.setExpirydate(d);
                 softCheeseExpiryInsertRepository.insertExpiryEvent(softCheeseExpiry);
-                sb.append("<@").append(cm.getDiscordId()).append("> gained ").append(cm.getAmount() / 10).append(" lbs of soft cheese which will rot on ").append(d);
+                sb.append("<@").append(cm.getDiscordId()).append("> gained ").append(cm.getAmount() / 10).append(" lbs of soft cheese.");
                 sb.append("\\n");
             } catch (DairyNotFoundException e) {
                 e.printStackTrace();
