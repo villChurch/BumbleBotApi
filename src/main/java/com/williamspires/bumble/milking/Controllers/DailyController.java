@@ -50,10 +50,10 @@ public class DailyController {
         if (dailyRepository.countByDiscordID(id) < 1) {
             Farmer farmer = farmerRepository.findById(id)
                     .orElseThrow(() -> new FarmerNotFoundException(id));
-            int baseXp = 25;
+            int baseXp = 50;
             int randomNum = ThreadLocalRandom.current().nextInt(1, 10 + 1);
             List<Goats> goats = goatRepository.findGoatsByOwnerId(id);
-            int runningCosts = goats.size() * 15;
+            int runningCosts = goats.size() * 10;
             if (runningCosts > farmer.getCredits()) {
                 DailyResponse response = new DailyResponse();
                 response.setResponse("Your current balance of " + farmer.getCredits() + " is less than the " +
