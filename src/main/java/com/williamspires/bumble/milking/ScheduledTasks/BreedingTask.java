@@ -1,10 +1,12 @@
 package com.williamspires.bumble.milking.ScheduledTasks;
 
 import com.williamspires.bumble.milking.Repositories.CookingDoesRepository;
+import com.williamspires.bumble.milking.Repositories.DeadGoatInsetRepository;
 import com.williamspires.bumble.milking.Repositories.GoatRepository;
 import com.williamspires.bumble.milking.Repositories.NewBornKidInsert;
 import com.williamspires.bumble.milking.Webhook.PostMilkExpiry;
 import com.williamspires.bumble.milking.models.CookingDoes;
+import com.williamspires.bumble.milking.models.DeadGoats;
 import com.williamspires.bumble.milking.models.Goats;
 import com.williamspires.bumble.milking.models.NewBornKids;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,8 @@ public class BreedingTask {
     GoatRepository goatRepository;
     @Autowired
     NewBornKidInsert newBornKidInsert;
+    @Autowired
+    DeadGoatInsetRepository deadGoatInsetRepository;
 
     @Scheduled(cron = "0 58 0 * * *", zone = "GMT")
     public void BreedingScheduledTask() {
@@ -40,11 +44,28 @@ public class BreedingTask {
         StringBuilder sb = new StringBuilder();
         if (doesReadyAsGoats.size() > 0) {
             for (Goats doe : doesReadyAsGoats) {
-                int numberOfKiddsToMake = ThreadLocalRandom.current().nextInt(1, 5);
-                sb.append("<@").append(doe.getOwnerId()).append("> ").append(doe.getName()).append(" has produced ").append(numberOfKiddsToMake).append(" new kids");
-                sb.append("\\n");
-                for (int i = 0; i < numberOfKiddsToMake; i++) {
-                    newBornKidInsert.saveKiddToDB(GenerateNewKid(doe));
+                int goatSurvives = ThreadLocalRandom.current().nextInt(1, 61);
+                if (goatSurvives == 10) {
+                    DeadGoats deadGoat = new DeadGoats();
+                    deadGoat.setName(doe.getName());
+                    deadGoat.setBreed(doe.getBreed());
+                    deadGoat.setBaseColour(doe.getBasecolour());
+                    deadGoat.setLevel(doe.getLevel());
+                    deadGoat.setOwnerId(doe.getOwnerId());
+                    deadGoat.setImageLink(doe.getImageLink());
+                    deadGoatInsetRepository.insertWithEntityManager(deadGoat);
+                    sb.append("<@").append(doe.getOwnerId()).append(">")
+                            .append("Oh no! Your goat has died from birthing complications. Rest in peace ")
+                            .append(doe.getName());
+                    sb.append("\\n");
+                    goatRepository.delete(doe);
+                } else {
+                    int numberOfKiddsToMake = ThreadLocalRandom.current().nextInt(1, 5);
+                    sb.append("<@").append(doe.getOwnerId()).append("> ").append(doe.getName()).append(" has produced ").append(numberOfKiddsToMake).append(" new kids");
+                    sb.append("\\n");
+                    for (int i = 0; i < numberOfKiddsToMake; i++) {
+                        newBornKidInsert.saveKiddToDB(GenerateNewKid(doe));
+                    }
                 }
             }
             PostMilkExpiry.SendWebhook(sb.toString());

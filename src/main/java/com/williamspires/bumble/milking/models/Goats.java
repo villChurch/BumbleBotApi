@@ -42,4 +42,7 @@ public class Goats {
 
     @Column(name = "experience")
     private double experience;
+
+    @Column(name = "imagelink")
+    private String imageLink;
 }
