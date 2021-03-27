@@ -53,6 +53,7 @@ public class BreedingTask {
                     deadGoat.setLevel(doe.getLevel());
                     deadGoat.setOwnerId(doe.getOwnerId());
                     deadGoat.setImageLink(doe.getImageLink());
+                    deadGoat.setGoatid(doe.getId());
                     deadGoatInsetRepository.insertWithEntityManager(deadGoat);
                     sb.append("<@").append(doe.getOwnerId()).append(">")
                             .append("Oh no! Your goat has died from birthing complications. Rest in peace ")
