@@ -79,7 +79,7 @@ public class MilkingController {
         Integer count = milkingRepository.countByDiscordId(id);
         MilkingResponse response = new MilkingResponse();
         if (count > 0) {
-            response.setMessage("You have already milked your goats today " +
+            response.setMessage("You have already milked your g today " +
                     "try again in " + hours + " hours " + minutes + " minutes and " + seconds + " seconds.");
         }
         else {

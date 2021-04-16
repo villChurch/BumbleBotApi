@@ -33,6 +33,8 @@ public class DailyController {
 
     @Autowired
     CookingDoesRepository cookingDoesRepository;
+    @Autowired
+    ItemsRepository itemsRepository;
 
     private int counter;
 
@@ -61,6 +63,7 @@ public class DailyController {
                         + runningCosts + " credits, therefore daily cannot be run.");
                 return response;
             }
+            Items alfalfa = itemsRepository.findByOwnerIdAndName(id, "alfalfa");
             farmer.setCredits(farmer.getCredits() - runningCosts);
             farmerRepository.save(farmer);
 
@@ -74,9 +77,14 @@ public class DailyController {
 
             StringBuilder sb = new StringBuilder();
             counter = 0;
+            if (alfalfa != null && alfalfa.getAmount() > 0) {
+                itemsRepository.delete(alfalfa);
+                baseXp = (int) Math.ceil(baseXp * 1.25);
+            }
+            int finalBaseXp = baseXp;
             goats.forEach(goat -> {
                 int startingLevel = goat.getLevel();
-                goat.setExperience(goat.getExperience() + (baseXp * randomNum));
+                goat.setExperience(goat.getExperience() + (finalBaseXp * randomNum));
                 goat.setLevel((int) Math.floor((Math.log((goat.getExperience() / 10)) / Math.log(1.05))));
                 goatRepository.save(goat);
                 if (startingLevel != goat.getLevel()) {
