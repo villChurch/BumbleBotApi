@@ -14,9 +14,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @RestController
@@ -79,13 +81,17 @@ public class MilkingController {
         Integer count = milkingRepository.countByDiscordId(id);
         MilkingResponse response = new MilkingResponse();
         if (count > 0) {
-            response.setMessage("You have already milked your g today " +
+            response.setMessage("You have already milked your goats today " +
                     "try again in " + hours + " hours " + minutes + " minutes and " + seconds + " seconds.");
         }
         else {
             List<Goats> goats = goatRepository.findGoatsByOwnerId(id);
             goats = goats.stream()
                     .filter(x -> x.getLevel() >= 100)
+                    .collect(Collectors.toList());
+            Predicate<Goats> isDazzle = goat -> goat.getBreed().equalsIgnoreCase("Dazzle");
+            List<Goats> dazzles = goats.stream()
+                    .filter(isDazzle)
                     .collect(Collectors.toList());
             List<Integer> cookingDoes = cookingDoesRepository.findAll().stream()
                     .map(CookingDoes::getGoatid)
@@ -107,9 +113,23 @@ public class MilkingController {
                         .filter(goat -> grazingGoatIds.contains(goat.getId()))
                         .collect(Collectors.toList());
                 goats.removeAll(boostedBithces);
+                goats.removeAll(dazzles);
+                boostedBithces.removeAll(dazzles);
                 double milkAmount = goats.stream().mapToDouble(x -> (x.getLevel() - 99) * 0.3).sum();
                 milkAmount += boostedBithces.stream().mapToDouble(x -> ((x.getLevel() - 99) * 0.3) * 1.25).sum();
+                int numberOfnaughtyDazzles = 0;
+                List<Goats> naughtyDazzles = new ArrayList<>();
+                for (Goats dazzle : dazzles) {
+                    var randomNumer = ThreadLocalRandom.current().nextInt(1, 3);
+                    if (randomNumer == 2) {
+                        numberOfnaughtyDazzles++;
+                        naughtyDazzles.add(dazzle);
+                    }
+                }
+                dazzles.removeAll(naughtyDazzles);
+                milkAmount += dazzles.stream().mapToDouble(x -> ((x.getLevel() - 99) * 0.3) * 1.25).sum();
                 goats.addAll(boostedBithces);
+                goats.addAll(dazzles);
                 DecimalFormat df = new DecimalFormat("#.#");
                 Milking milking = new Milking();
                 milking.setDiscordId(id);
@@ -166,6 +186,11 @@ public class MilkingController {
                     sb.append(System.getProperty("line.separator"));
                     sb.append("You discover " + numberOfGoatsAffected + " goats have Mastitis. They've lost up to " +
                             + levelsLost + " levels as they recover.");
+                }
+                if (numberOfnaughtyDazzles > 0) {
+                    sb.append(System.getProperty("line.separator"));
+                    sb.append(numberOfnaughtyDazzles + " of your Dazzles were troublesome during milking and " +
+                            "therefore were not  milked today.");
                 }
                 response.setMessage("You have successfully milked " + numberOfGoats +
                         " goats and gained " + df.format(milkAmount) + " lbs of milk"
