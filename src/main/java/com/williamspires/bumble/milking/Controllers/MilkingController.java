@@ -189,8 +189,8 @@ public class MilkingController {
                 }
                 if (numberOfnaughtyDazzles > 0) {
                     sb.append(System.getProperty("line.separator"));
-                    sb.append(numberOfnaughtyDazzles + " of your Dazzles were troublesome during milking and " +
-                            "therefore were not  milked today.");
+                    sb.append(numberOfnaughtyDazzles + " of your Dazzles were troublesome and " +
+                            "therefore were not milked today.");
                 }
                 response.setMessage("You have successfully milked " + numberOfGoats +
                         " goats and gained " + df.format(milkAmount) + " lbs of milk"
