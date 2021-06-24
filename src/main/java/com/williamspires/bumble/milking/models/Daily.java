@@ -5,22 +5,17 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-@Entity
-@Table(name = "milkexpiry")
 @Getter
 @Setter
-public class MilkExpiry {
-    @Id
-    @GeneratedValue
+@Entity
+@Table(name = "daily")
+public class Daily {
+
     @Column(name = "id")
+    @GeneratedValue
+    @Id
     private int id;
 
     @Column(name = "DiscordID")
     private String discordID;
-
-    @Column(name = "amount")
-    private double milk;
-
-    @Column(name = "expirydate")
-    private String expirydate;
 }

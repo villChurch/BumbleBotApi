@@ -6,21 +6,22 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "milkexpiry")
+@Table(name = "softcheeseexpiry")
 @Getter
 @Setter
-public class MilkExpiry {
-    @Id
+public class SoftCheeseExpiry {
+
     @GeneratedValue
+    @Id
     @Column(name = "id")
     private int id;
 
-    @Column(name = "DiscordID")
-    private String discordID;
-
     @Column(name = "amount")
-    private double milk;
+    private int amount;
 
     @Column(name = "expirydate")
     private String expirydate;
+
+    @Column(name = "DiscordID")
+    private String discordID;
 }
