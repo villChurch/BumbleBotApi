@@ -81,8 +81,8 @@ public class MilkingController {
         Integer count = milkingRepository.countByDiscordId(id);
         MilkingResponse response = new MilkingResponse();
         if (count > 0) {
-            response.setMessage("You have already milked your goats today " +
-                    "try again in " + hours + " hours " + minutes + " minutes and " + seconds + " seconds.");
+            response.setMessage("You have already milked your goats today. " +
+                    "Try again tomorrow when they have more milk");
         }
         else {
             List<Goats> goats = goatRepository.findGoatsByOwnerId(id);
