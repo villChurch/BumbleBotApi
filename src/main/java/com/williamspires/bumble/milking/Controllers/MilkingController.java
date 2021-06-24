@@ -17,6 +17,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -40,6 +41,8 @@ public class MilkingController {
     GrazingRepository grazingRepository;
     @Autowired
     CookingDoesRepository cookingDoesRepository;
+    @Autowired
+    MaintenanceRepository maintenanceRepository;
 
     private int counter;
 
@@ -120,7 +123,7 @@ public class MilkingController {
                 int numberOfnaughtyDazzles = 0;
                 List<Goats> naughtyDazzles = new ArrayList<>();
                 for (Goats dazzle : dazzles) {
-                    var randomNumer = ThreadLocalRandom.current().nextInt(1, 3);
+                    var randomNumer = ThreadLocalRandom.current().nextInt(1, 6);
                     if (randomNumer == 2) {
                         numberOfnaughtyDazzles++;
                         naughtyDazzles.add(dazzle);
@@ -169,6 +172,25 @@ public class MilkingController {
                     milkAmount = milkAmount * 1.25;
                     farmer.setOats(false);
                 }
+                // Maintenance milk boost or reduction
+
+                Optional<Maintenance> farmersMaintenance = maintenanceRepository.findMaintenanceByFarmerid(farmer.getDiscordID());
+
+                double maintenanceMultiplier = 1;
+                if (farmersMaintenance.isPresent()) {
+                    if (farmersMaintenance.get().isNeedsMaintenance()) {
+                        maintenanceMultiplier = 0.75;
+                        sb.append("Milk production is reduced as maintenance is needed.");
+                        sb.append(System.getProperty("line.separator"));
+                    }
+                    else if (farmersMaintenance.get().isMilkingBoost()) {
+                        maintenanceMultiplier = 1.10;
+                        farmersMaintenance.get().setMilkingBoost(false);
+                        maintenanceRepository.save(farmersMaintenance.get());
+                    }
+                }
+
+                milkAmount = milkAmount * maintenanceMultiplier;
                 farmer.setMilk(farmer.getMilk() + milkAmount);
                 farmerRepository.save(farmer);
                 MilkExpiry milkExpiry = new MilkExpiry();

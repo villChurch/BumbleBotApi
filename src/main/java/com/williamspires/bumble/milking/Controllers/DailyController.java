@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,12 @@ public class DailyController {
     CookingDoesRepository cookingDoesRepository;
     @Autowired
     ItemsRepository itemsRepository;
+
+    @Autowired
+    MaintenanceRepository maintenanceRepository;
+
+    @Autowired
+    MaintenanceRepositoryInsert maintenanceRepositoryInsert;
 
     private int counter;
 
@@ -67,6 +74,10 @@ public class DailyController {
             farmer.setCredits(farmer.getCredits() - runningCosts);
             farmerRepository.save(farmer);
 
+            int numberOfGoats = goats.size();
+            int maintenanceChanceStacker = numberOfGoats >= 150 ? 10 : (int) (Math.ceil(1500 / numberOfGoats));
+            boolean maintenance = ThreadLocalRandom.current().nextInt(0, maintenanceChanceStacker + 1) == 3;
+
             List<Integer> cookingGoatsIds = cookingDoesRepository.findAll().stream()
                     .map(CookingDoes::getGoatid)
                     .collect(Collectors.toList());
@@ -76,12 +87,26 @@ public class DailyController {
             goats.removeAll(cookingGoats);
 
             StringBuilder sb = new StringBuilder();
+            if (maintenance) {
+                sb.append(maintenance(farmer));
+                sb.append(System.getProperty("line.separator"));
+            }
             counter = 0;
             if (alfalfa != null && alfalfa.getAmount() > 0) {
                 itemsRepository.delete(alfalfa);
                 baseXp = (int) Math.ceil(baseXp * 1.25);
             }
-            int finalBaseXp = baseXp;
+
+            Optional<Maintenance> farmersMaintenance = maintenanceRepository.findMaintenanceByFarmerid(farmer.getDiscordID());
+
+            double maintenanceMultiplier = 1;
+            if (farmersMaintenance.isPresent()) {
+                maintenanceMultiplier = farmersMaintenance.get().isDailyBoost() ? 1.10 : maintenanceMultiplier;
+                farmersMaintenance.get().setDailyBoost(false);
+                maintenanceRepository.save(farmersMaintenance.get());
+            }
+
+            int finalBaseXp = (int) Math.ceil(baseXp * maintenanceMultiplier);
             goats.forEach(goat -> {
                 int startingLevel = goat.getLevel();
                 goat.setExperience(goat.getExperience() + (finalBaseXp * randomNum));
@@ -110,6 +135,50 @@ public class DailyController {
             response.setResponse("You have already completed your chores today. Chores need doing again in "
             + hours + " hours " + minutes + " minutes and " + seconds + " seconds.");
             return response;
+        }
+    }
+
+    private Maintenance returnFarmersMaintenance(Farmer farmer) {
+        Optional<Maintenance> farmersMaintenance = maintenanceRepository.findMaintenanceByFarmerid(farmer.getDiscordID());
+        if (!farmersMaintenance.isPresent()) {
+            Maintenance newFarmersMaintenance = new Maintenance();
+            newFarmersMaintenance.setFarmerid(farmer.getDiscordID());
+            maintenanceRepositoryInsert.insertMaintenanceWithEntityManager(newFarmersMaintenance);
+            return maintenanceRepository.findMaintenanceByFarmerid(farmer.getDiscordID()).get();
+        }
+        else {
+            return farmersMaintenance.get();
+        }
+    }
+
+    private String maintenance(Farmer farmer) {
+        Maintenance farmersMaintenance = returnFarmersMaintenance(farmer);
+        if (farmersMaintenance.isNeedsMaintenance()) {
+            return "";
+        }
+        boolean goodOutcome = ThreadLocalRandom.current().nextInt(0, 9) == 3;
+        if (goodOutcome) {
+            int scenario = ThreadLocalRandom.current().nextInt(0, 3);
+            if (scenario == 0) {
+                farmersMaintenance.setDailyBoost(true);
+                maintenanceRepository.save(farmersMaintenance);
+                return "Due to good maintenance your goats have gained an additional 10% xp boost.";
+            } else if (scenario == 1) {
+                farmersMaintenance.setMilkingBoost(true);
+                maintenanceRepository.save(farmersMaintenance);
+                return "Due to good maintenance your goats have gained an additional 10% milk boost for today";
+            }
+            farmersMaintenance.setDailyBoost(true);
+            farmersMaintenance.setMilkingBoost(true);
+            maintenanceRepository.save(farmersMaintenance);
+            return "Due to exceptional maintenance your goats have gained a 10% xp boost and a 10% milk boost for today's tasks";
+        }
+        else {
+            farmersMaintenance.setNeedsMaintenance(true);
+            farmersMaintenance.setDailyBoost(false);
+            farmersMaintenance.setMilkingBoost(false);
+            maintenanceRepository.save(farmersMaintenance);
+            return "Unfortunately your equipment requires some maintenance and as a result your goats milk production will drop until it is fixed.";
         }
     }
 
