@@ -71,7 +71,7 @@ public class MilkingController {
                     .filter(x -> x.getLevel() >= 100)
                     .collect(Collectors.toList());
             if (goats.size() < 1) {
-                response.setMessage("You don't currently have any adult goats that can be milked");
+                response.setMessage("You currently don't have any adult goats that can be milked");
             }
             else {
                 double milkAmount = goats.stream().mapToDouble(x -> (x.getLevel() - 100) * 0.3).sum();
