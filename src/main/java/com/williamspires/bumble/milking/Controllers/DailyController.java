@@ -156,7 +156,7 @@ public class DailyController {
         if (farmersMaintenance.isNeedsMaintenance()) {
             return "";
         }
-        boolean goodOutcome = ThreadLocalRandom.current().nextInt(0, 9) == 3;
+        boolean goodOutcome = ThreadLocalRandom.current().nextInt(1, 11) % 2 == 0;
         if (goodOutcome) {
             int scenario = ThreadLocalRandom.current().nextInt(0, 3);
             if (scenario == 0) {
