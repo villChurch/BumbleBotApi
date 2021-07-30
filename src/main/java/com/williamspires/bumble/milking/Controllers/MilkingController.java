@@ -2,6 +2,7 @@ package com.williamspires.bumble.milking.Controllers;
 
 import com.williamspires.bumble.milking.Exceptions.FarmerNotFoundException;
 import com.williamspires.bumble.milking.Repositories.*;
+import com.williamspires.bumble.milking.Webhook.PostMilkExpiry;
 import com.williamspires.bumble.milking.models.*;
 import lombok.var;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,6 +139,8 @@ public class MilkingController {
                 milking.setDiscordId(id);
                 milkingRepositoryInsert.insertApiEvent(milking);
                 StringBuilder sb = new StringBuilder();
+                sb.append("<@").append(farmer.getDiscordID()).append(">");
+                sb.append("\\n");;
                 counter = 0;
                 goats.forEach( goat ->  {
                     int startingLevel = goat.getLevel();
@@ -181,7 +184,7 @@ public class MilkingController {
                     if (farmersMaintenance.get().isNeedsMaintenance()) {
                         maintenanceMultiplier = 0.75;
                         sb.append("Milk production is reduced as maintenance is needed.");
-                        sb.append(System.getProperty("line.separator"));
+                        sb.append("\\n");;
                     }
                     else if (farmersMaintenance.get().isMilkingBoost()) {
                         maintenanceMultiplier = 1.10;
@@ -205,21 +208,22 @@ public class MilkingController {
                     sb.append(counter == 1 ? counter + " goat has levelled up" : counter + " goats have levelled up.");
                 }
                 if (randomNum == 3) {
-                    sb.append(System.getProperty("line.separator"));
+                    sb.append("\\n");;
                     sb.append("You discover " + numberOfGoatsAffected + " goats have Mastitis. They've lost up to " +
                             + levelsLost + " levels as they recover.");
                 }
                 if (numberOfnaughtyDazzles > 0) {
-                    sb.append(System.getProperty("line.separator"));
+                    sb.append("\\n");;
                     sb.append(numberOfnaughtyDazzles + " of your Dazzles were troublesome during milking and " +
                             "therefore were not milked today.");
                 }
                 response.setMessage("You have successfully milked " + numberOfGoats +
                         " goats and gained " + df.format(milkAmount) + " lbs of milk"
-                        + System.getProperty("line.separator")
+                        + "\\n"
                         + sb.toString());
             }
         }
+        PostMilkExpiry.SendWebhook(response.getMessage());
         return response;
     }
 }
