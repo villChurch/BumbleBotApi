@@ -32,4 +32,10 @@ public class Farmer {
 
     @Column(name = "oats")
     private boolean oats;
+
+    @Column(name = "perkpoints")
+    private int perkpoints;
+
+    @Column(name = "working")
+    private boolean working;
 }
