@@ -38,4 +38,10 @@ public class Farmer {
 
     @Column(name = "working")
     private boolean working;
+
+    @Column(name = "level")
+    private int level;
+
+    @Column(name = "experience")
+    private double experience;
 }

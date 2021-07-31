@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+@SuppressWarnings("IntegerDivisionInFloatingPointContext")
 @RestController
 public class WorkingController {
 
@@ -34,6 +35,16 @@ public class WorkingController {
         startTime = startTime.plusMinutes(minutes);
         long seconds = startTime.until(now, ChronoUnit.SECONDS);
         workingRepository.delete(working);
-        return "You worked for " + hours + " hours " + minutes + " minutes and " + seconds + " seconds.";
+        double xpToAdd = (double) hours * 2;
+        xpToAdd += (double) (minutes/60) * 2;
+        xpToAdd += (double) (seconds/60/60) * 2;
+        farmer.setExperience(farmer.getExperience() + xpToAdd);
+        int startLevel = farmer.getLevel();
+        farmer.setLevel((int) Math.floor((Math.log((farmer.getExperience() / 50)) / Math.log(1.4))));
+        farmerRepository.save(farmer);
+        return farmer.getLevel() == startLevel ?
+                "You worked for " + hours + " hours " + minutes + " minutes and " + seconds + " seconds and gained " + xpToAdd + " xp." :
+                "You worked for " + hours + " hours " + minutes + " minutes and " + seconds +
+                        " seconds and gained " + xpToAdd + " xp and are now level " + farmer.getLevel() + ".";
     }
 }
