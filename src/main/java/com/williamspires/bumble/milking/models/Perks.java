@@ -16,15 +16,18 @@ public class Perks {
     @Column(name = "id")
     private int id;
 
-    @Column(name = "perkName")
-    private String perkName;
+    @Column(name = "perkname")
+    private String perkname;
 
-    @Column(name = "perkBounsText")
-    private String perkBonusText;
+    @Column(name = "perkbonustext")
+    private String perkbonustext;
 
-    @Column(name = "perkCost")
-    private int perkCost;
+    @Column(name = "perkcost")
+    private int perkcost;
 
-    @Column(name = "levelUnlocked")
-    private int levelUnlocked;
+    @Column(name = "levelunlocked")
+    private int levelunlocked;
+
+    @Column(name = "requires")
+    private int requires;
 }
