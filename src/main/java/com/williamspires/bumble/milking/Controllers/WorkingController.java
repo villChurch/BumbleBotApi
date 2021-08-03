@@ -50,18 +50,26 @@ public class WorkingController {
         long minutes = startTime.until(now, ChronoUnit.MINUTES);
         startTime = startTime.plusMinutes(minutes);
         long seconds = startTime.until(now, ChronoUnit.SECONDS);
+        log.info("Seconds {} minutes {} hours {}", seconds, minutes, hours);
         workingRepository.delete(working);
         double xpToAdd = (double) hours * 2;
+        log.info("xp after hours {}", xpToAdd);
         xpToAdd += (double) (minutes/60) * 2;
+        log.info("xp after minutes {}", xpToAdd);
         xpToAdd += (double) (seconds/60/60) * 2;
+        log.info("xp after seconds {}", xpToAdd);
         if (farmersPurchasedPerks.stream().map(Perks::getId).collect(Collectors.toList()).contains(2)) {
             xpToAdd = xpToAdd * 2;
             log.info(   "XP has been doubled due to perks");
         }
-        farmer.setExperience(farmer.getExperience() + xpToAdd);
         int startLevel = farmer.getLevel();
-        farmer.setLevel((int) Math.floor((Math.log((farmer.getExperience() / 50)) / Math.log(1.4))));
-        farmerRepository.save(farmer);
+        if (xpToAdd > 0) {
+            farmer.setExperience(farmer.getExperience() + xpToAdd);
+            farmer.setLevel((int) Math.floor((Math.log((farmer.getExperience() / 50)) / Math.log(1.4))));
+            farmerRepository.save(farmer);
+        } else if (xpToAdd < 0) {
+            xpToAdd = 0;
+        }
         return farmer.getLevel() == startLevel ?
                 "You worked for " + hours + " hours " + minutes + " minutes and " + seconds + " seconds and gained " + xpToAdd + " xp." :
                 "You worked for " + hours + " hours " + minutes + " minutes and " + seconds +
