@@ -44,6 +44,10 @@ public class MilkingController {
     CookingDoesRepository cookingDoesRepository;
     @Autowired
     MaintenanceRepository maintenanceRepository;
+    @Autowired
+    FarmerPerksRepository farmerPerksRepository;
+    @Autowired
+    PerkRepository perkRepository;
 
     private int counter;
 
@@ -82,6 +86,21 @@ public class MilkingController {
         long seconds = now.until(tomorrowMidnight, ChronoUnit.SECONDS);
         Farmer farmer = farmerRepository.findById(id)
                 .orElseThrow(() -> new FarmerNotFoundException(id));
+        List<FarmerPerks> farmersPerks = farmerPerksRepository.findFarmerPerksByFarmerid(farmer.getDiscordID());
+        List<Perks> allPerks = perkRepository.findAll();
+        List<Perks> farmersPurchasedPerks = allPerks.stream().filter(perk ->
+                farmersPerks.stream().map(FarmerPerks::getPerkid).collect(Collectors.toList())
+                        .contains(perk.getId())).collect(Collectors.toList());
+        Double perkMultiplier = 1.00;
+        if (farmersPurchasedPerks.stream().map(Perks::getId).collect(Collectors.toList()).contains(13)) {
+            perkMultiplier = 1.15;
+        }
+        else if (farmersPurchasedPerks.stream().map(Perks::getId).collect(Collectors.toList()).contains(8)) {
+            perkMultiplier = 1.10;
+        }
+        else if (farmersPurchasedPerks.stream().map(Perks::getId).collect(Collectors.toList()).contains(6)) {
+            perkMultiplier = 1.05;
+        }
         Integer count = milkingRepository.countByDiscordId(id);
         MilkingResponse response = new MilkingResponse();
         if (count > 0) {
@@ -113,14 +132,14 @@ public class MilkingController {
                         .stream()
                         .map(grazing::getGoatId)
                         .collect(Collectors.toList());
-                List<Goats> boostedBithces = goats.stream()
+                List<Goats> boostedBitches = goats.stream()
                         .filter(goat -> grazingGoatIds.contains(goat.getId()))
                         .collect(Collectors.toList());
-                goats.removeAll(boostedBithces);
+                goats.removeAll(boostedBitches);
                 goats.removeAll(dazzles);
-                boostedBithces.removeAll(dazzles);
+                boostedBitches.removeAll(dazzles);
                 double milkAmount = goats.stream().mapToDouble(x -> (x.getLevel() - 99) * 0.3).sum();
-                milkAmount += boostedBithces.stream().mapToDouble(x -> ((x.getLevel() - 99) * 0.3) * 1.25).sum();
+                milkAmount += boostedBitches.stream().mapToDouble(x -> ((x.getLevel() - 99) * 0.3) * 1.25).sum();
                 int numberOfnaughtyDazzles = 0;
                 List<Goats> naughtyDazzles = new ArrayList<>();
                 for (Goats dazzle : dazzles) {
@@ -132,7 +151,7 @@ public class MilkingController {
                 }
                 dazzles.removeAll(naughtyDazzles);
                 milkAmount += dazzles.stream().mapToDouble(x -> ((x.getLevel() - 99) * 0.3) * 1.25).sum();
-                goats.addAll(boostedBithces);
+                goats.addAll(boostedBitches);
                 goats.addAll(dazzles);
                 DecimalFormat df = new DecimalFormat("#.#");
                 Milking milking = new Milking();
@@ -152,7 +171,14 @@ public class MilkingController {
                         counter++;
                     }
                 });
-                int randomNum = ThreadLocalRandom.current().nextInt(1, 15 + 1);
+                int mastitisRandomNumber = 15;
+                if (farmersPurchasedPerks.stream().map(Perks::getId).collect(Collectors.toList()).contains(7)) {
+                    mastitisRandomNumber = 19;
+                }
+                else if (farmersPurchasedPerks.stream().map(Perks::getId).collect(Collectors.toList()).contains(3)) {
+                    mastitisRandomNumber = 17;
+                }
+                int randomNum = ThreadLocalRandom.current().nextInt(1, mastitisRandomNumber + 1);
                 int numberOfGoatsAffected = 0;
                 int levelsLost = 0;
                 if (randomNum == 3) {
@@ -194,6 +220,7 @@ public class MilkingController {
                 }
 
                 milkAmount = milkAmount * maintenanceMultiplier;
+                milkAmount = milkAmount * perkMultiplier;
                 farmer.setMilk(farmer.getMilk() + milkAmount);
                 farmerRepository.save(farmer);
                 MilkExpiry milkExpiry = new MilkExpiry();

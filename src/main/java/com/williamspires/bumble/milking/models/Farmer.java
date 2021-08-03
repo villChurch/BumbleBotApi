@@ -32,4 +32,16 @@ public class Farmer {
 
     @Column(name = "oats")
     private boolean oats;
+
+    @Column(name = "perkpoints")
+    private int perkpoints;
+
+    @Column(name = "working")
+    private boolean working;
+
+    @Column(name = "level")
+    private int level;
+
+    @Column(name = "experience")
+    private double experience;
 }

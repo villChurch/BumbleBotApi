@@ -31,6 +31,10 @@ public class DairyController {
     CaveRepository caveRepository;
     @Autowired
     AgingInsertRepository agingInsertRepository;
+    @Autowired
+    PerkRepository perkRepository;
+    @Autowired
+    FarmerPerksRepository farmerPerksRepository;
 
     @GetMapping("dairy/cave/{id}/add/softcheese/{amount}")
     public String AddSoftCheeseToCaveByFarmerId(@PathVariable(value = "id") String id,
