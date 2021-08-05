@@ -66,6 +66,12 @@ public class WorkingController {
         if (xpToAdd > 0) {
             farmer.setExperience(farmer.getExperience() + xpToAdd);
             farmer.setLevel((int) Math.floor((Math.log((farmer.getExperience() / 50)) / Math.log(1.4))));
+            if (startLevel < farmer.getLevel() && farmer.getLevel() < 16) {
+                farmer.setPerkpoints(farmer.getPerkpoints() + 1);
+            }
+            if (farmer.getLevel() < 0) {
+                farmer.setLevel(0);
+            }
             farmerRepository.save(farmer);
         } else if (xpToAdd < 0) {
             xpToAdd = 0;
