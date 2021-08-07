@@ -4,6 +4,7 @@ import com.williamspires.bumble.milking.Exceptions.FarmerNotFoundException;
 import com.williamspires.bumble.milking.Repositories.*;
 import com.williamspires.bumble.milking.Webhook.PostMilkExpiry;
 import com.williamspires.bumble.milking.models.*;
+import lombok.extern.slf4j.Slf4j;
 import lombok.var;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 public class MilkingController {
 
@@ -178,6 +180,7 @@ public class MilkingController {
                 else if (farmersPurchasedPerks.stream().map(Perks::getId).collect(Collectors.toList()).contains(3)) {
                     mastitisRandomNumber = 17;
                 }
+                log.info("Mastitis random number ======> {}", mastitisRandomNumber);
                 int randomNum = ThreadLocalRandom.current().nextInt(1, mastitisRandomNumber + 1);
                 int numberOfGoatsAffected = 0;
                 int levelsLost = 0;
@@ -218,8 +221,9 @@ public class MilkingController {
                         maintenanceRepository.save(farmersMaintenance.get());
                     }
                 }
-
+                log.info("Milk amount before maintenance multiplier of {} =====> {}", maintenanceMultiplier, milkAmount);
                 milkAmount = milkAmount * maintenanceMultiplier;
+                log.info("Milk amount before perk multiplier of {} ========> {}", perkMultiplier, milkAmount);
                 milkAmount = milkAmount * perkMultiplier;
                 farmer.setMilk(farmer.getMilk() + milkAmount);
                 farmerRepository.save(farmer);

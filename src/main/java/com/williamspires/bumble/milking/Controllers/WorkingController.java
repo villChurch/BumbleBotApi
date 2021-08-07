@@ -66,8 +66,13 @@ public class WorkingController {
         if (xpToAdd > 0) {
             farmer.setExperience(farmer.getExperience() + xpToAdd);
             farmer.setLevel((int) Math.floor((Math.log((farmer.getExperience() / 50)) / Math.log(1.4))));
-            if (startLevel < farmer.getLevel() && farmer.getLevel() < 16) {
-                farmer.setPerkpoints(farmer.getPerkpoints() + 1);
+            if (startLevel >= 15) {
+                log.info("No perk points added as farmer is already level 15");
+                farmer.setLevel(15);
+            }
+            else if (startLevel < farmer.getLevel()) {
+                int perkPointsToAdd = farmer.getLevel() > 15 ? 15 - startLevel : farmer.getLevel() - startLevel;
+                farmer.setPerkpoints(farmer.getPerkpoints() + perkPointsToAdd);
             }
             if (farmer.getLevel() < 0) {
                 farmer.setLevel(0);
