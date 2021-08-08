@@ -113,6 +113,7 @@ public class MilkingController {
             List<Goats> goats = goatRepository.findGoatsByOwnerId(id);
             goats = goats.stream()
                     .filter(x -> x.getLevel() >= 100)
+                    .filter(x -> !x.getBreed().equalsIgnoreCase("Buck"))
                     .collect(Collectors.toList());
             Predicate<Goats> isDazzle = goat -> goat.getBreed().equalsIgnoreCase("Dazzle");
             List<Goats> dazzles = goats.stream()
