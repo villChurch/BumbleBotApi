@@ -5,36 +5,33 @@ import com.williamspires.bumble.milking.Exceptions.DairyNotFoundException;
 import com.williamspires.bumble.milking.Exceptions.FarmerNotFoundException;
 import com.williamspires.bumble.milking.Repositories.*;
 import com.williamspires.bumble.milking.models.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Calendar;
-import java.util.List;
 
 @SuppressWarnings("unused")
 @RestController
 public class DairyController {
 
-    @Autowired
-    DairyRepository dairyRepository;
-    @Autowired
-    FarmerRepository farmerRepository;
-    @Autowired
-    MilkExpiryRepository milkExpiryRepository;
-    @Autowired
-    CurdingInsertRepository curdingInsertRepository;
-    @Autowired
-    SoftCheeseExpiryRepository softCheeseExpiryRepository;
-    @Autowired
-    CaveRepository caveRepository;
-    @Autowired
-    AgingInsertRepository agingInsertRepository;
-    @Autowired
-    PerkRepository perkRepository;
-    @Autowired
-    FarmerPerksRepository farmerPerksRepository;
+    final DairyRepository dairyRepository;
+    final FarmerRepository farmerRepository;
+    final CurdingInsertRepository curdingInsertRepository;
+    final CaveRepository caveRepository;
+    final AgingInsertRepository agingInsertRepository;
+    final PerkRepository perkRepository;
+    final FarmerPerksRepository farmerPerksRepository;
+
+    public DairyController(DairyRepository dairyRepository, FarmerRepository farmerRepository, CurdingInsertRepository curdingInsertRepository, CaveRepository caveRepository, AgingInsertRepository agingInsertRepository, PerkRepository perkRepository, FarmerPerksRepository farmerPerksRepository) {
+        this.dairyRepository = dairyRepository;
+        this.farmerRepository = farmerRepository;
+        this.curdingInsertRepository = curdingInsertRepository;
+        this.caveRepository = caveRepository;
+        this.agingInsertRepository = agingInsertRepository;
+        this.perkRepository = perkRepository;
+        this.farmerPerksRepository = farmerPerksRepository;
+    }
 
     @GetMapping("dairy/cave/{id}/add/softcheese/{amount}")
     public String AddSoftCheeseToCaveByFarmerId(@PathVariable(value = "id") String id,
@@ -48,19 +45,6 @@ public class DairyController {
         double softCheese = dairy.getSoftcheese();
         if (amount > softCheese) {
             return "You cannot add more soft cheese than you own to your cave";
-        }
-        List<SoftCheeseExpiry> farmersSoftCheese = softCheeseExpiryRepository.findAllByDiscordID(id);
-        int amountToAdd = amount;
-        while(amountToAdd > 0) {
-            SoftCheeseExpiry softCheeseExpiry = farmersSoftCheese.get(0);
-            amountToAdd = amountToAdd - softCheeseExpiry.getAmount();
-            farmersSoftCheese.remove(0);
-            if (softCheeseExpiry.getAmount() <= 0) {
-                softCheeseExpiryRepository.delete(softCheeseExpiry);
-            }
-            else  {
-                softCheeseExpiryRepository.save(softCheeseExpiry);
-            }
         }
         cave.setSoftcheese(cave.getSoftcheese() + amount);
         caveRepository.save(cave);
@@ -88,24 +72,9 @@ public class DairyController {
         if (amount > milk) {
             return "You cannot add more milk than you have to the dairy";
         }
-        List<MilkExpiry> farmersMilk = milkExpiryRepository.findByDiscordID(id);
-        int amountToAdd = amount;
         farmer.setMilk(farmer.getMilk() - amount);
         farmerRepository.save(farmer);
-        while(amountToAdd > 0 || farmersMilk.size() < 1) {
-            MilkExpiry fm = farmersMilk.get(0);
-            if (amountToAdd > fm.getMilk()) {
-                amountToAdd -= fm.getMilk();
-                milkExpiryRepository.delete(fm);
-                farmersMilk.remove(0);
-            } else {
-                fm.setMilk(fm.getMilk() - amountToAdd);
-                milkExpiryRepository.save(fm);
-                amountToAdd = 0;
-            }
-        }
         dairy.setMilk(dairy.getMilk() + amount);
-
         Calendar c = Calendar.getInstance();
         c.add(Calendar.DATE, 1);
         String d = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE);

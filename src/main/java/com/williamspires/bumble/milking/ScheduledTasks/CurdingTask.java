@@ -3,13 +3,10 @@ package com.williamspires.bumble.milking.ScheduledTasks;
 import com.williamspires.bumble.milking.Exceptions.DairyNotFoundException;
 import com.williamspires.bumble.milking.Repositories.CurdingRespoitory;
 import com.williamspires.bumble.milking.Repositories.DairyRepository;
-import com.williamspires.bumble.milking.Repositories.SoftCheeseExpiryInsertRepository;
 import com.williamspires.bumble.milking.Webhook.PostMilkExpiry;
 import com.williamspires.bumble.milking.models.Curding;
 import com.williamspires.bumble.milking.models.Dairy;
-import com.williamspires.bumble.milking.models.SoftCheeseExpiry;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +17,13 @@ import java.util.List;
 @Slf4j
 public class CurdingTask {
 
-    @Autowired
-    CurdingRespoitory curdingRespoitory;
-    @Autowired
-    DairyRepository dairyRepository;
-    @Autowired
-    SoftCheeseExpiryInsertRepository softCheeseExpiryInsertRepository;
+    final CurdingRespoitory curdingRespoitory;
+    final DairyRepository dairyRepository;
+
+    public CurdingTask(CurdingRespoitory curdingRespoitory, DairyRepository dairyRepository) {
+        this.curdingRespoitory = curdingRespoitory;
+        this.dairyRepository = dairyRepository;
+    }
 
     @Scheduled(cron = "0 15 0 * * *", zone = "GMT")
     private void SortCurdledMilk() {
@@ -41,12 +39,6 @@ public class CurdingTask {
                 curdingRespoitory.delete(cm);
                 Calendar c = Calendar.getInstance();
                 c.add(Calendar.DATE, 21);
-                String d = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE);
-                SoftCheeseExpiry softCheeseExpiry = new SoftCheeseExpiry();
-                softCheeseExpiry.setAmount((int) (cm.getAmount() / 10));
-                softCheeseExpiry.setDiscordID(cm.getDiscordId());
-                softCheeseExpiry.setExpirydate(d);
-                softCheeseExpiryInsertRepository.insertExpiryEvent(softCheeseExpiry);
                 sb.append("<@").append(cm.getDiscordId()).append("> gained ").append(cm.getAmount() / 10).append(" lbs of soft cheese.");
                 sb.append("\\n");
             } catch (DairyNotFoundException e) {

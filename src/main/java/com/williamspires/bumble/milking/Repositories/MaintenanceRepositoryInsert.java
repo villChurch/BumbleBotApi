@@ -14,7 +14,7 @@ public class MaintenanceRepositoryInsert {
     private EntityManager entityManager;
 
     @Transactional
-    private void insertMaintenanceEvent(Maintenance maintenance) {
+    public void insertMaintenanceEvent(Maintenance maintenance) {
         entityManager.createNativeQuery("INSERT INTO maintenance (farmerId) VALUES (?)")
                 .setParameter(1, maintenance.getFarmerid())
                 .executeUpdate();

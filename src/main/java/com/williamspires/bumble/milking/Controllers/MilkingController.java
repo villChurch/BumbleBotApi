@@ -6,18 +6,12 @@ import com.williamspires.bumble.milking.Webhook.PostMilkExpiry;
 import com.williamspires.bumble.milking.models.*;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.DecimalFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -28,30 +22,29 @@ import java.util.stream.Collectors;
 @RestController
 public class MilkingController {
 
-    @Autowired
-    FarmerRepository farmerRepository;
-    @Autowired
-    GoatRepository goatRepository;
-    @Autowired
-    MilkingRepository milkingRepository;
-    @Autowired
-    MilkingRepositoryInsert milkingRepositoryInsert;
-    @Autowired
-    MilkExpiryRepositoryInsert milkExpiryRepositoryInsert;
-    @Autowired
-    MilkExpiryRepository milkExpiryRepository;
-    @Autowired
-    GrazingRepository grazingRepository;
-    @Autowired
-    CookingDoesRepository cookingDoesRepository;
-    @Autowired
-    MaintenanceRepository maintenanceRepository;
-    @Autowired
-    FarmerPerksRepository farmerPerksRepository;
-    @Autowired
-    PerkRepository perkRepository;
+    final FarmerRepository farmerRepository;
+    final GoatRepository goatRepository;
+    final MilkingRepository milkingRepository;
+    final MilkingRepositoryInsert milkingRepositoryInsert;
+    final GrazingRepository grazingRepository;
+    final CookingDoesRepository cookingDoesRepository;
+    final MaintenanceRepository maintenanceRepository;
+    final FarmerPerksRepository farmerPerksRepository;
+    final PerkRepository perkRepository;
 
     private int counter;
+
+    public MilkingController(FarmerRepository farmerRepository, GoatRepository goatRepository, MilkingRepository milkingRepository, MilkingRepositoryInsert milkingRepositoryInsert, GrazingRepository grazingRepository, CookingDoesRepository cookingDoesRepository, MaintenanceRepository maintenanceRepository, FarmerPerksRepository farmerPerksRepository, PerkRepository perkRepository) {
+        this.farmerRepository = farmerRepository;
+        this.goatRepository = goatRepository;
+        this.milkingRepository = milkingRepository;
+        this.milkingRepositoryInsert = milkingRepositoryInsert;
+        this.grazingRepository = grazingRepository;
+        this.cookingDoesRepository = cookingDoesRepository;
+        this.maintenanceRepository = maintenanceRepository;
+        this.farmerPerksRepository = farmerPerksRepository;
+        this.perkRepository = perkRepository;
+    }
 
     @GetMapping("/farmer/{id}")
     public Farmer GetFarmerById(@PathVariable(value = "id") String id) throws FarmerNotFoundException {
@@ -66,26 +59,8 @@ public class MilkingController {
         return goatRepository.findGoatsByOwnerId(farmer.getDiscordID());
     }
 
-    @GetMapping("milk/expiry/{id}")
-    public List<MilkExpiry> GetMilkExpiryForFarmer(@PathVariable(value = "id") String id) throws FarmerNotFoundException {
-        //noinspection unused
-        Farmer farmer = farmerRepository.findById(id)
-        .orElseThrow(() -> new FarmerNotFoundException(id));
-
-        return milkExpiryRepository.findByDiscordID(id);
-    }
-
     @GetMapping("milk/{id}")
     public MilkingResponse GetMilkingResponseForUser(@PathVariable(value = "id") String id) throws FarmerNotFoundException {
-        LocalTime midnight = LocalTime.MIDNIGHT;
-        LocalDate today = LocalDate.now();
-        LocalDateTime tomorrowMidnight = LocalDateTime.of(today, midnight).plusDays(1);
-        LocalDateTime now = LocalDateTime.now();
-        long hours = now.until(tomorrowMidnight, ChronoUnit.HOURS);
-        now = now.plusHours(hours);
-        long minutes = now.until(tomorrowMidnight, ChronoUnit.MINUTES);
-        now = now.plusMinutes(minutes);
-        long seconds = now.until(tomorrowMidnight, ChronoUnit.SECONDS);
         Farmer farmer = farmerRepository.findById(id)
                 .orElseThrow(() -> new FarmerNotFoundException(id));
         List<FarmerPerks> farmersPerks = farmerPerksRepository.findFarmerPerksByFarmerid(farmer.getDiscordID());
@@ -93,7 +68,7 @@ public class MilkingController {
         List<Perks> farmersPurchasedPerks = allPerks.stream().filter(perk ->
                 farmersPerks.stream().map(FarmerPerks::getPerkid).collect(Collectors.toList())
                         .contains(perk.getId())).collect(Collectors.toList());
-        Double perkMultiplier = 1.00;
+        double perkMultiplier = 1.00;
         if (farmersPurchasedPerks.stream().map(Perks::getId).collect(Collectors.toList()).contains(13)) {
             perkMultiplier = 1.15;
         }
@@ -162,7 +137,7 @@ public class MilkingController {
                 milkingRepositoryInsert.insertApiEvent(milking);
                 StringBuilder sb = new StringBuilder();
                 sb.append("<@").append(farmer.getDiscordID()).append(">");
-                sb.append("\\n");;
+                sb.append("\\n");
                 counter = 0;
                 goats.forEach( goat ->  {
                     int startingLevel = goat.getLevel();
@@ -214,7 +189,7 @@ public class MilkingController {
                     if (farmersMaintenance.get().isNeedsMaintenance()) {
                         maintenanceMultiplier = 0.75;
                         sb.append("Milk production is reduced as maintenance is needed.");
-                        sb.append("\\n");;
+                        sb.append("\\n");
                     }
                     else if (farmersMaintenance.get().isMilkingBoost()) {
                         maintenanceMultiplier = 1.10;
@@ -228,31 +203,21 @@ public class MilkingController {
                 milkAmount = milkAmount * perkMultiplier;
                 farmer.setMilk(farmer.getMilk() + milkAmount);
                 farmerRepository.save(farmer);
-                MilkExpiry milkExpiry = new MilkExpiry();
-                milkExpiry.setDiscordID(id);
-                milkExpiry.setMilk(milkAmount);
-                Calendar c = Calendar.getInstance();
-                c.add(Calendar.DATE, 3);
-                String d = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE);
-                milkExpiry.setExpirydate(d);
-                milkExpiryRepositoryInsert.insertExpiryEvent(milkExpiry);
                 if (counter > 0){
                     sb.append(counter == 1 ? counter + " goat has levelled up" : counter + " goats have levelled up.");
                 }
                 if (randomNum == 3) {
-                    sb.append("\\n");;
-                    sb.append("You discover " + numberOfGoatsAffected + " goats have Mastitis. They've lost up to " +
-                            + levelsLost + " levels as they recover.");
+                    sb.append("\\n");
+                    sb.append("You discover ").append(numberOfGoatsAffected).append(" goats have Mastitis. They've lost up to ").append(+levelsLost).append(" levels as they recover.");
                 }
                 if (numberOfnaughtyDazzles > 0) {
-                    sb.append("\\n");;
-                    sb.append(numberOfnaughtyDazzles + " of your Dazzles were troublesome during milking and " +
-                            "therefore were not milked today.");
+                    sb.append("\\n");
+                    sb.append(numberOfnaughtyDazzles).append(" of your Dazzles were troublesome during milking and ").append("therefore were not milked today.");
                 }
                 response.setMessage("You have successfully milked " + numberOfGoats +
                         " goats and gained " + df.format(milkAmount) + " lbs of milk"
                         + "\\n"
-                        + sb.toString());
+                        + sb);
             }
         }
         PostMilkExpiry.SendWebhook(response.getMessage());
