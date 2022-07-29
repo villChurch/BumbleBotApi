@@ -2,8 +2,8 @@ package com.williamspires.bumble.milking.Controllers;
 
 import com.williamspires.bumble.milking.Exceptions.FarmerNotFoundException;
 import com.williamspires.bumble.milking.Repositories.*;
+import com.williamspires.bumble.milking.Webhook.PostMilkExpiry;
 import com.williamspires.bumble.milking.models.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,30 +20,41 @@ import java.util.stream.Collectors;
 @RestController
 public class DailyController {
 
-    @Autowired
+    final
     DailyRepository dailyRepository;
 
-    @Autowired
+    final
     FarmerRepository farmerRepository;
 
-    @Autowired
+    final
     GoatRepository goatRepository;
 
-    @Autowired
+    final
     DailyRepositoryInsert dailyRepositoryInsert;
 
-    @Autowired
+    final
     CookingDoesRepository cookingDoesRepository;
-    @Autowired
+    final
     ItemsRepository itemsRepository;
 
-    @Autowired
+    final
     MaintenanceRepository maintenanceRepository;
 
-    @Autowired
+    final
     MaintenanceRepositoryInsert maintenanceRepositoryInsert;
 
     private int counter;
+
+    public DailyController(DailyRepository dailyRepository, FarmerRepository farmerRepository, GoatRepository goatRepository, DailyRepositoryInsert dailyRepositoryInsert, CookingDoesRepository cookingDoesRepository, ItemsRepository itemsRepository, MaintenanceRepository maintenanceRepository, MaintenanceRepositoryInsert maintenanceRepositoryInsert) {
+        this.dailyRepository = dailyRepository;
+        this.farmerRepository = farmerRepository;
+        this.goatRepository = goatRepository;
+        this.dailyRepositoryInsert = dailyRepositoryInsert;
+        this.cookingDoesRepository = cookingDoesRepository;
+        this.itemsRepository = itemsRepository;
+        this.maintenanceRepository = maintenanceRepository;
+        this.maintenanceRepositoryInsert = maintenanceRepositoryInsert;
+    }
 
     @GetMapping("/daily/{id}")
     public DailyResponse GetDaily(@PathVariable(value = "id") String id) throws FarmerNotFoundException {
@@ -122,12 +133,13 @@ public class DailyController {
             DailyResponse response = new DailyResponse();
             response.setResponse("You completed your daily chores and all your goats gained " + (baseXp * randomNum) + " experience."
                     + System.getProperty("line.separator")
-                    + sb.toString()
+                    + sb
                     + System.getProperty("line.separator")
                     + "Your expenditure for feed and supplies today is " + runningCosts + " credits.");
             Daily daily = new Daily();
             daily.setDiscordID(id);
             dailyRepositoryInsert.insertApiEvent(daily);
+            PostMilkExpiry.SendWebhook(response.toString());
             return response;
         }
         else  {

@@ -17,6 +17,23 @@ public class PostMilkExpiry {
         PostMilkExpiry.url = url;
     }
     public static void SendWebhook(String data) {
+        /*HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("User-Agent", "BumbleBot_milking_expiry");
+        RestTemplate restTemplate = new RestTemplate();
+        String requestJson = "{\n" +
+                "  \"username\":\"BumbleBot\",\n" +
+                "  \"avatar_url\":\"https://cdn.discordapp.com/attachments/745012634889355264/764883956729905172/bumblebutton.png\",\n" +
+                "  \"content\":\"" + data +"\"" +
+                "\n}";
+        log.info(requestJson);
+        log.info("data =========> {}", data);
+        HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
+        restTemplate.postForEntity(url, entity, String.class);*/
+        SendWebhook(data, url);
+    }
+
+    public static void SendWebhook(String data, String webhook) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("User-Agent", "BumbleBot_milking_expiry");
@@ -29,6 +46,6 @@ public class PostMilkExpiry {
         log.info(requestJson);
         log.info("data =========> {}", data);
         HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
-        restTemplate.postForEntity(url, entity, String.class);
+        restTemplate.postForEntity(webhook, entity, String.class);
     }
 }
