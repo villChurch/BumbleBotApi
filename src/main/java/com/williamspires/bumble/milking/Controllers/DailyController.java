@@ -139,13 +139,14 @@ public class DailyController {
             Daily daily = new Daily();
             daily.setDiscordID(id);
             dailyRepositoryInsert.insertApiEvent(daily);
-            PostMilkExpiry.SendWebhook(response.toString());
+            PostMilkExpiry.SendWebhook(response.getResponse());
             return response;
         }
         else  {
             DailyResponse response = new DailyResponse();
             response.setResponse("You have already completed your chores today. Chores need doing again in "
             + hours + " hours " + minutes + " minutes and " + seconds + " seconds.");
+            PostMilkExpiry.SendWebhook(response.getResponse());
             return response;
         }
     }
