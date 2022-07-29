@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class DailyQuestionTask {
 
 
@@ -22,14 +23,16 @@ public class DailyQuestionTask {
     @Autowired
     DailyQuestionRepository dailyQuestionRepository;
 
-    @Scheduled(cron = "0 0 13 * * *", zone = "GMT")
+    @Scheduled(cron = "0 0 19 * * *", zone = "UTC")
     public void PostDailyQuestionTask() {
         List<String> questions = dailyQuestionRepository.findAll()
                 .stream()
                 .map(DailyQuestion::getQuestion)
+                .distinct()
                 .collect(Collectors.toList());
         Random rand = new Random();
         int value = rand.nextInt(questions.size());
+        log.info("Question: {}", questions.get(value));
         PostMilkExpiry.SendWebhook(questions.get(value), url);
     }
 

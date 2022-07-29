@@ -3,14 +3,12 @@ package com.williamspires.bumble.milking.models;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Getter
 @Setter
-@Table(name="DailyQuestion")
+@Table(name="dailyquestion")
+@Entity
 public class DailyQuestion {
 
     @Column(name = "id")
