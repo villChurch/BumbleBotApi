@@ -18,4 +18,7 @@ public class DailyQuestion {
 
     @Column(name = "question")
     private String question;
+
+    @Column(name = "used")
+    private boolean used;
 }
