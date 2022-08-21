@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Component
@@ -25,11 +26,25 @@ public class DailyQuestionTask {
 
     @Scheduled(cron = "0 0 19 * * *", zone = "UTC")
     public void PostDailyQuestionTask() {
+        Predicate<DailyQuestion> unused = dailyQuestion -> !dailyQuestion.isUsed();
         List<String> questions = dailyQuestionRepository.findAll()
                 .stream()
+                .filter(unused)
                 .map(DailyQuestion::getQuestion)
                 .distinct()
                 .collect(Collectors.toList());
+        if (questions.size() < 1) {
+            dailyQuestionRepository.findAll().forEach(dailyQuestion -> {
+                dailyQuestion.setUsed(false);
+                dailyQuestionRepository.save(dailyQuestion);
+            });
+            questions = dailyQuestionRepository.findAll()
+                    .stream()
+                    .filter(unused)
+                    .map(DailyQuestion::getQuestion)
+                    .distinct()
+                    .collect(Collectors.toList());
+        }
         Random rand = new Random();
         int value = rand.nextInt(questions.size());
         log.info("Question: {}", questions.get(value));
